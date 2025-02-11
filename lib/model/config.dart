@@ -57,7 +57,9 @@ class Config {
   final String? state;
 
   /// Indicates the type of user interaction that is required.
-  /// The only valid values at this time are *login*, *none*, and *consent*.
+  /// The only valid values at this time are *login*, *none*, *consent*, and *select_account*.
+  /// If *select_account* is wanting to be used, the user must have at least signed in once and
+  /// when logging out, the *clearCookies* value must be false.
   final String? prompt;
 
   /// Used to secure authorization code grants via Proof Key for Code Exchange (PKCE).
@@ -164,6 +166,9 @@ class Config {
   /// add an app bar to the login page
   PreferredSizeWidget? appBar;
 
+  /// add onPageFinished callback
+  Function(String url)? onPageFinished;
+
   /// Determine an appropriate redirect URI for AAD authentication.
   /// On web, it is the location that the application is being served from.
   /// On mobile, it is https://login.live.com/oauth20_desktop.srf
@@ -218,19 +223,98 @@ class Config {
     this.customParameters = const {},
     this.postLogoutRedirectUri,
     this.appBar,
-  })  : authorizationUrl = customAuthorizationUrl ??
-            (isB2C
-                ? (customDomainUrlWithTenantId == null
-                    ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/authorize'
-                    : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/authorize')
-                : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize'),
+    this.onPageFinished,
+  })
+      : authorizationUrl = customAuthorizationUrl ??
+      (isB2C
+          ? (customDomainUrlWithTenantId == null
+          ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/authorize'
+          : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/authorize')
+          : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/authorize'),
         tokenUrl = customTokenUrl ??
             (isB2C
                 ? (customDomainUrlWithTenantId == null
-                    ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/token'
-                    : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/token')
+                ? 'https://$tenant.b2clogin.com/$tenant.onmicrosoft.com/$policy/oauth2/v2.0/token'
+                : '$customDomainUrlWithTenantId/$policy/oauth2/v2.0/token')
                 : 'https://login.microsoftonline.com/$tenant/oauth2/v2.0/token'),
         aOptions = aOptions ?? AndroidOptions(encryptedSharedPreferences: true),
         cacheLocation = cacheLocation ?? CacheLocation.localStorage,
         redirectUri = redirectUri ?? getDefaultRedirectUri();
+
+  Config copyWith({
+    String? tenant,
+    String? policy,
+    String? clientId,
+    String? responseType,
+    String? redirectUri,
+    String? scope,
+    bool? webUseRedirect,
+    String? responseMode,
+    String? state,
+    String? prompt,
+    String? codeChallenge,
+    String? codeChallengeMethod,
+    String? nonce,
+    String? tokenIdentifier,
+    String? clientSecret,
+    String? resource,
+    bool? isB2C,
+    String? customAuthorizationUrl,
+    String? customTokenUrl,
+    String? customDomainUrlWithTenantId,
+    String? loginHint,
+    String? domainHint,
+    String? codeVerifier,
+    String? userAgent,
+    bool? isStub,
+    Widget? loader,
+    AndroidOptions? aOptions,
+    CacheLocation? cacheLocation,
+    GlobalKey<NavigatorState>? navigatorKey,
+    String? origin,
+    Map<String, String>? customParameters,
+    String? postLogoutRedirectUri,
+    PreferredSizeWidget? appBar,
+    Function(String url)? onPageFinished,
+  }) {
+    return Config(
+      tenant: tenant ?? this.tenant,
+      policy: policy ?? this.policy,
+      clientId: clientId ?? this.clientId,
+      responseType: responseType ?? this.responseType,
+      redirectUri: redirectUri ?? this.redirectUri,
+      scope: scope ?? this.scope,
+      webUseRedirect: webUseRedirect ?? this.webUseRedirect,
+      responseMode: responseMode ?? this.responseMode,
+      state: state ?? this.state,
+      prompt: prompt ?? this.prompt,
+      codeChallenge: codeChallenge ?? this.codeChallenge,
+      codeChallengeMethod: codeChallengeMethod ?? this.codeChallengeMethod,
+      nonce: nonce ?? this.nonce,
+      tokenIdentifier: tokenIdentifier ?? this.tokenIdentifier,
+      clientSecret: clientSecret ?? this.clientSecret,
+      resource: resource ?? this.resource,
+      isB2C: isB2C ?? this.isB2C,
+      customAuthorizationUrl: customAuthorizationUrl ??
+          this.customAuthorizationUrl,
+      customTokenUrl: customTokenUrl ?? this.customTokenUrl,
+      customDomainUrlWithTenantId: customDomainUrlWithTenantId ??
+          this.customDomainUrlWithTenantId,
+      loginHint: loginHint ?? this.loginHint,
+      domainHint: domainHint ?? this.domainHint,
+      codeVerifier: codeVerifier ?? this.codeVerifier,
+      userAgent: userAgent ?? this.userAgent,
+      isStub: isStub ?? this.isStub,
+      loader: loader ?? this.loader,
+      aOptions: aOptions ?? this.aOptions,
+      cacheLocation: cacheLocation ?? this.cacheLocation,
+      navigatorKey: navigatorKey ?? this.navigatorKey,
+      origin: origin ?? this.origin,
+      customParameters: customParameters ?? this.customParameters,
+      postLogoutRedirectUri:
+      postLogoutRedirectUri ?? this.postLogoutRedirectUri,
+      appBar: appBar ?? this.appBar,
+      onPageFinished: onPageFinished ?? this.onPageFinished,
+    );
+  }
 }

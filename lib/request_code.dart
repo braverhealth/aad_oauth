@@ -11,6 +11,7 @@ class RequestCode {
   final AuthorizationRequest _authorizationRequest;
   final String _redirectUriHost;
   late NavigationDelegate _navigationDelegate;
+  late WebViewCookieManager _cookieManager;
   String? _code;
 
   RequestCode(Config config)
@@ -20,6 +21,7 @@ class RequestCode {
     _navigationDelegate = NavigationDelegate(
       onNavigationRequest: _onNavigationRequest,
     );
+    _cookieManager = WebViewCookieManager();
   }
 
   Future<String?> requestCode() async {
@@ -34,6 +36,13 @@ class RequestCode {
     await controller.setBackgroundColor(Colors.transparent);
     await controller.setUserAgent(_config.userAgent);
     await controller.loadRequest(launchUri);
+    if (_config.onPageFinished != null) {
+      await controller.setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: _config.onPageFinished,
+        ),
+      );
+    }
 
     final webView = WebViewWidget(controller: controller);
 
@@ -50,13 +59,16 @@ class RequestCode {
       MaterialPageRoute(
         builder: (context) => Scaffold(
           appBar: _config.appBar,
-          body: WillPopScope(
-            onWillPop: () async {
+          body: PopScope(
+            canPop: false,
+            onPopInvoked: (bool didPop) async {
+              if (didPop) return;
               if (await controller.canGoBack()) {
                 await controller.goBack();
-                return false;
+                return;
               }
-              return true;
+              final NavigatorState navigator = Navigator.of(context);
+              navigator.pop();
             },
             child: SafeArea(
               child: Stack(
@@ -90,7 +102,7 @@ class RequestCode {
   }
 
   Future<void> clearCookies() async {
-    await WebViewCookieManager().clearCookies();
+    await _cookieManager.clearCookies();
   }
 
   String _constructUrlParams() => _mapToQueryParams(
