@@ -9,7 +9,8 @@ var aadOauth = (function () {
     scopes: null,
     prompt: null,
     extraQueryParameters: {},
-    loginHint: null
+    loginHint: null,
+    state: null
   };
 
   // Initialise the myMSALObj for the given client, authority and scope
@@ -46,6 +47,7 @@ var aadOauth = (function () {
      tokenRequest.extraQueryParameters = JSON.parse(config.customParameters);
      tokenRequest.prompt = config.prompt;
      tokenRequest.loginHint = config.loginHint;
+     tokenRequest.state = config.state;
 
      myMSALObj = new msal.PublicClientApplication(msalConfig);
      // Register Callbacks for Redirect flow and record the task so we
@@ -136,7 +138,8 @@ var aadOauth = (function () {
         prompt: tokenRequest.prompt,
         account: account,
         extraQueryParameters: tokenRequest.extraQueryParameters,
-        loginHint: tokenRequest.loginHint
+        loginHint: tokenRequest.loginHint,
+        state: tokenRequest.state
       });
     } else {
       // Sign in with popup
@@ -146,7 +149,8 @@ var aadOauth = (function () {
           prompt: tokenRequest.prompt,
           account: account,
           extraQueryParameters: tokenRequest.extraQueryParameters,
-          loginHint: tokenRequest.loginHint
+          loginHint: tokenRequest.loginHint,
+          state: tokenRequest.state
         });
 
         authResult = interactiveAuthResult;
