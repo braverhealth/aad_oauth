@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+- Web: support WebAssembly builds (`flutter build web --wasm`). The browser code moved from `package:js` to `dart:js_interop` and is selected with `dart.library.js_interop`. Before, a WebAssembly build fell back to a stub and `AadOAuth(config)` overflowed the stack.
+- Requires Dart 3.3 / Flutter 3.19.
+
 ## [1.0.1] - 20230215
 
 - Optionally avoid prompting popup on web logout https://github.com/Earlybyte/aad_oauth/pull/277 (by @phildupuis)
